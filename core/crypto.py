@@ -1,10 +1,12 @@
 import hashlib
 import hmac
+import shutil
 import subprocess
 from pathlib import Path
 from core.exceptions import RouterProtocolException
 
 BRIDGE_PATH = Path(__file__).resolve().parent.parent / "assets" / "crypto_bridge.js"
+NODE_BIN = shutil.which("node") or "/opt/homebrew/bin/node" or "/usr/local/bin/node" or "node"
 
 class RouterCrypto:
     @staticmethod
@@ -25,7 +27,7 @@ class RouterCrypto:
         """
         try:
             res = subprocess.check_output(
-                ["node", str(BRIDGE_PATH), "derive_dk", password, salt_hex],
+                [NODE_BIN, str(BRIDGE_PATH), "derive_dk", password, salt_hex],
                 stderr=subprocess.PIPE
             )
             return res.decode("utf-8").strip()
@@ -39,7 +41,7 @@ class RouterCrypto:
         """
         try:
             res = subprocess.check_output(
-                ["node", str(BRIDGE_PATH), "encrypt", dk_hex, plaintext],
+                [NODE_BIN, str(BRIDGE_PATH), "encrypt", dk_hex, plaintext],
                 stderr=subprocess.PIPE
             )
             return res.decode("utf-8").strip()
@@ -53,7 +55,7 @@ class RouterCrypto:
         """
         try:
             res = subprocess.check_output(
-                ["node", str(BRIDGE_PATH), "decrypt", dk_hex, ciphertext_json],
+                [NODE_BIN, str(BRIDGE_PATH), "decrypt", dk_hex, ciphertext_json],
                 stderr=subprocess.PIPE
             )
             return res.decode("utf-8").strip()

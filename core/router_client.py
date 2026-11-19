@@ -192,6 +192,19 @@ class RouterClient:
             self.last_login_time = time.time()
             logger.info("Router authentication successful. Session ID established.")
 
+    def logout(self) -> None:
+        """
+        Explicitly terminates the session on the router, freeing the GUI lock for other users.
+        """
+        if self.session_id and self.csrf_token:
+            try:
+                self._send_raw(f"/data/logout.json?csrf_token={self.csrf_token}")
+            except Exception:
+                pass
+        self.session_id = None
+        self.csrf_token = None
+        logger.info("Router session terminated cleanly.")
+
     def ensure_authenticated(self) -> None:
         if not self.session_id or not self.csrf_token or not self.dk_hex:
             self.login()

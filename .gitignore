@@ -1,5 +1,7 @@
 # Environment secrets
 .env
+watchdog.log
+router_login.js
 
 # Python bytecode & cache
 __pycache__/
