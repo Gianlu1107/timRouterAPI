@@ -5,6 +5,7 @@ Ensures critical network settings (5GHz DFS Channel 104, Band Steering OFF, Gues
 persist permanently and are automatically restored if reset by overnight router sweeps or reboots.
 """
 import sys
+import time
 import logging
 from pathlib import Path
 
@@ -29,11 +30,20 @@ TARGET_SECURITY_5G = "wpa2"
 
 def check_and_enforce():
     client = RouterClient.get_instance()
-    try:
-        client.login()
-    except Exception as e:
-        logger.warning(f"Could not connect to router (another session may be active): {e}")
-        return
+    
+    logged_in = False
+    for attempt in range(1, 4):
+        try:
+            client.login()
+            logged_in = True
+            break
+        except Exception as e:
+            if attempt < 3:
+                logger.info(f"Router login attempt {attempt} failed ({e}). Retrying in 15 seconds...")
+                time.sleep(15)
+            else:
+                logger.warning(f"Could not connect to router after {attempt} attempts: {e}")
+                return
 
     try:
         raw = client.get_data("wifi_general")

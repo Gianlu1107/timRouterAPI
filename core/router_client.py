@@ -139,7 +139,11 @@ class RouterClient:
             init_csrf = csrf_match.group(1)
 
             # Step 2: Extract dynamic encryption salt
-            res2 = self._send_raw(f"/data/user_lang.json?csrf_token={init_csrf}")
+            ts = int(time.time() * 1000)
+            res2 = self._send_raw(
+                f"/data/user_lang.json?_={ts}&csrf_token={init_csrf}",
+                extra_headers={"Referer": f"http://{self.host}/login.html", "X-Requested-With": "XMLHttpRequest"}
+            )
             body2 = self._extract_body(res2)
 
             enc_key_match = re.search(r"\"encryption_key\":\s*\"([^\"]+)\"", body2)
@@ -160,10 +164,12 @@ class RouterClient:
 
             # Step 5: Post credentials
             login_payload = f"LoginName={self.username}&LoginPWD={user_password}"
+            ts = int(time.time() * 1000)
             res3 = self._send_raw(
-                f"/data/login.json?csrf_token={init_csrf}",
+                f"/data/login.json?_={ts}&csrf_token={init_csrf}",
                 method="POST",
-                body=login_payload
+                body=login_payload,
+                extra_headers={"Referer": f"http://{self.host}/login.html", "X-Requested-With": "XMLHttpRequest"}
             )
 
             body3 = self._extract_body(res3).strip()
